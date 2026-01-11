@@ -92,10 +92,17 @@
 
         /* Header */
         .header {
-            display: flex;
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+
+        /* Empty div for balancing grid */
+        .header-spacer {
+            width: 40px;
         }
 
         .title-input {
@@ -106,7 +113,8 @@
             font-size: 1.5rem;
             font-weight: 700;
             text-align: center;
-            flex: 1;
+            width: 100%;
+            min-width: 0;
             transition: opacity 0.2s;
         }
 
@@ -117,7 +125,7 @@
         .theme-toggle {
             background: var(--btn-primary);
             border: 1px solid var(--card-border);
-            border-radius: 50%;
+            border-radius: 12px;
             width: 40px;
             height: 40px;
             display: flex;
@@ -126,15 +134,16 @@
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 1.25rem;
+            flex-shrink: 0;
         }
 
         .theme-toggle:hover {
             background: var(--btn-primary-hover);
-            transform: rotate(180deg) scale(1.1);
+            transform: scale(1.05);
         }
 
         .theme-toggle:active {
-            transform: rotate(180deg) scale(0.95);
+            transform: scale(0.95);
         }
 
         /* Timer Display with Progress Ring */
@@ -408,6 +417,7 @@
         <div class="glass-card">
             <!-- Header -->
             <div class="header">
+                <div class="header-spacer"></div>
                 <input type="text" id="appTitle" class="title-input" value="倒數計時器">
                 <button class="theme-toggle" onclick="toggleTheme()">
                     <span id="themeIcon">🌙</span>
