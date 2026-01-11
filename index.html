@@ -171,7 +171,7 @@
             fill: none;
             stroke-width: 8;
             stroke-linecap: round;
-            transition: stroke-dashoffset 1s linear;
+            /* Transition controlled by JavaScript */
         }
 
         .progress-ring {
@@ -501,7 +501,7 @@
         const radius = 90;
         const circumference = 2 * Math.PI * radius;
         progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
-        progressCircle.style.strokeDashoffset = circumference;
+        progressCircle.style.strokeDashoffset = 0; // Start full
 
         // Audio System
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -596,11 +596,12 @@
 
         function updateProgress() {
             if (initialSeconds === 0) {
-                progressCircle.style.strokeDashoffset = circumference;
+                progressCircle.style.strokeDashoffset = circumference; // Empty when no time set
                 return;
             }
+            // Progress represents remaining time (1 = full, 0 = empty)
             const progress = totalSeconds / initialSeconds;
-            const offset = circumference - (progress * circumference);
+            const offset = circumference * (1 - progress); // Invert: 0 offset = full, circumference = empty
             progressCircle.style.strokeDashoffset = offset;
         }
 
@@ -645,14 +646,25 @@
                 resetBtn.disabled = true;
                 disableInputs(true);
                 updateURL();
+
+                // Start progress ring animation immediately
+                progressCircle.style.transition = `stroke-dashoffset ${totalSeconds}s linear`;
+                progressCircle.style.strokeDashoffset = circumference; // Animate to empty
+
                 timerInterval = setInterval(() => {
                     totalSeconds--;
                     updateDisplay();
-                    updateProgress();
                     if (totalSeconds <= 0) endTimer();
                 }, 1000);
             } else {
                 clearInterval(timerInterval);
+                // Pause the animation
+                progressCircle.style.transition = 'none';
+                updateProgress(); // Sync to current position
+                setTimeout(() => {
+                    progressCircle.style.transition = `stroke-dashoffset ${totalSeconds}s linear`;
+                }, 10);
+
                 startBtn.textContent = '開始';
                 startBtn.className = 'action-btn btn-start';
                 display.classList.remove('pulse');
@@ -665,11 +677,18 @@
         function endTimer() {
             clearInterval(timerInterval);
             isRunning = false;
+            totalSeconds = 0;
+
+            // Stop animation and set to empty
+            progressCircle.style.transition = 'none';
+            progressCircle.style.strokeDashoffset = circumference;
+
             startBtn.textContent = '開始';
             startBtn.className = 'action-btn btn-start';
             display.classList.remove('pulse');
             resetBtn.disabled = false;
             disableInputs(false);
+            updateDisplay();
             updateURL();
             let count = 0;
             const alarm = setInterval(() => {
@@ -685,12 +704,16 @@
             isRunning = false;
             totalSeconds = initialSeconds;
             startTimestamp = 0;
+
+            // Reset animation
+            progressCircle.style.transition = 'none';
+            updateProgress(); // Reset to full
+
             startBtn.textContent = '開始';
             startBtn.className = 'action-btn btn-start';
             display.classList.remove('pulse');
             disableInputs(false);
             updateDisplay();
-            updateProgress();
             updateURL();
         }
 
